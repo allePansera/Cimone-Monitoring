@@ -22,10 +22,13 @@ class Telegram:
         pzgram.Chat(bot, 693507806).send(self.periodo+"\n\n"+self.clima+"\n"+self.temp+"\n"+self.wind+"\n")
 
 
+def sendLive():
+    urllib.request.urlretrieve("https://www.cimonesci.it/cams/passo_lupo.jpg", "img.png")
+    pzgram.Chat(bot, 693507806).send_photo("./img.png", caption="Passo del Lupo")
 
 def Today():
-    pzgram.Chat(bot, 693507806).send(datetime.date.today() + datetime.timedelta(days=0))
-    pzgram.Chat(bot, 693507806).send("ok")
+    pzgram.Chat(bot, 693507806).send(datetime.date.today())
+
     headers = {}
     headers[
     "user-agent"] = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.27 Safari/537.17"
@@ -34,7 +37,9 @@ def Today():
 
     resp = urllib.request.urlopen(req).read()
     soup = bs.BeautifulSoup(resp, "lxml")
-    day = soup.find("table", attrs={"class":"contenitore-meteo"})
+    find = soup.find("div", attrs={"id": "3-0"})
+    day = find.find("table", attrs={"class":"contenitore-meteo"})
+
 
     data = day.find_all("tr")
     cont = 1
@@ -200,12 +205,15 @@ def main():
     button2 = pzgram.create_button("data2", data="#3-1")
     button3 = pzgram.create_button("data3", data="#3-2")
     button4 = pzgram.create_button("data4", data="#3-3")
+    buttonlive = pzgram.create_button("live", data="send")
 
-    k = [[button1,button2, button3, button4]]
+    k = [[buttonlive,button1,button2, button3, button4]]
+
     keyboard = pzgram.create_inline(k)
+
     pzgram.Chat(bot, 693507806).send("Seleziona la data che ti interessa: ", reply_markup=keyboard)
 
-    bot.set_query({"#3-4": Today, "#3-1": Today2, "#3-2": Today3, "#3-3": Today4})
+    bot.set_query({"#3-0": Today, "#3-1": Today2, "#3-2": Today3, "#3-3": Today4, "send": sendLive})
 
 
 bot.set_commands({"info": main})
